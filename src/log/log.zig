@@ -33,10 +33,12 @@ pub fn debug(msg: []const u8, obj: anytype) void {
         },
         *zvm.core.reg.Reg8, zvm.core.reg.Reg8 => {
             std.debug.print(" \x1b[38;2;0;255;255m* Name: {s}\x1b[0m\n", .{obj.name});
+            std.debug.print(" \x1b[38;2;0;255;255m* ID: {d}\x1b[0m\n", .{obj.id});
             std.debug.print(" \x1b[38;2;0;255;255m* Value: {d}\x1b[0m\n", .{@as(u8, @bitCast(obj.value))});
         },
         *zvm.core.reg.Reg32, zvm.core.reg.Reg32 => {
             std.debug.print(" \x1b[38;2;0;255;255m* Name: {s}\x1b[0m\n", .{obj.name});
+            std.debug.print(" \x1b[38;2;0;255;255m* ID: {d}\x1b[0m\n", .{obj.id});
             std.debug.print(" \x1b[38;2;0;255;255m* Value: {d}\x1b[0m\n", .{@as(u32, @bitCast(obj.value))});
         },
         zvm.device.device.Device, *zvm.device.device.Device => {

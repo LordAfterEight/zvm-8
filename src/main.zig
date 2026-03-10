@@ -5,6 +5,8 @@ pub fn main() anyerror!void {
     var cpu = zvm.core.cpu.CPU.init();
     var bus = zvm.mem.bus.Bus.init();
 
+    cpu.gpr[10].load_uint(@as(u16, 256));
+
     cpu.connect_bus(&bus);
 
     const cpu_device = zvm.device.device.Device.create(&cpu, "CPU Device");

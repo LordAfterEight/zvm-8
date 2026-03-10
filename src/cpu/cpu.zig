@@ -26,6 +26,9 @@ pub const CPU = struct {
             .bus = undefined,
             .cu = undefined
         };
+        for (0..cpu.gpr.len) |i| {
+            cpu.gpr[i].id = @intCast(i);
+        }
         cpu.cu = zvm.core.cu.CU.init(&cpu);
         return cpu;
     }

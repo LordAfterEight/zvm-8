@@ -8,6 +8,7 @@ pub const Reg8 = Register(1);
 pub fn Register(comptime capacity: u8) type {
     return struct {
         name: []const u8,
+        id: u8 = 0,
         value: [capacity]u8 = [_]u8{0} ** capacity,
 
         /// Creates a new 32-bit Register
@@ -18,14 +19,17 @@ pub fn Register(comptime capacity: u8) type {
         }
 
         /// Loads an unsigned integer as little endian into the register.
-        /// Returns an error if the value exceeds the register's capacity, or if the
-        /// provided value is not of an unsigned integer type
-        pub fn load_uint(self: *@This(), val: anytype) anyerror!void {
+        /// Ignores the value to load if the original value is too large
+        /// for the register to hold or if its type is invalid.
+        pub fn load_uint(self: *@This(), val: anytype) void {
             switch (@TypeOf(val)) {
                 comptime_int, u8, u16, u32 => {
                     const bits: usize = capacity * 8;
                     const max: comptime_int = if (bits == 0) 0 else ((@as(comptime_int, 1) << @intCast(bits)) - 1);
-                    if (@as(comptime_int, val) > max) return error.ValueExceedsCapacity;
+                    if (std.math.maxInt(@TypeOf(val)) > max) {
+                        zvm.logging.debug("Value to load exceeds size, truncating", self);
+                        return;
+                    }
 
                     const uval = @as(u32, val);
                     for (0..self.value.len) |idx| {
@@ -35,7 +39,10 @@ pub fn Register(comptime capacity: u8) type {
                     zvm.logging.debug("Loaded value:", val);
                     zvm.logging.debug("Reg:", self);
                 },
-                else => return error.InvalidType
+                else => {
+                    zvm.logging.debug("Invalid value type, doing nothing", self);
+                    return;
+                }
             }
         }
 

@@ -10,7 +10,7 @@ pub const Bus = struct {
     pub fn init() Bus {
         return .{
             .ram = [_]u8{0} ** 0x1000000,
-            .mapped_regions = undefined,
+            .mapped_regions = [_]?Region{null} ** 20,
             .region_counter = 0,
         };
     }
@@ -18,7 +18,7 @@ pub const Bus = struct {
     /// Maps a device to the memory address space
     pub fn map_device(self: *Bus, base: u16, size: u16, device: zvm.device.device.Device) void {
         zvm.logging.debug("Mapping device", device);
-        if (self.mapped_regions[self.region_counter] != null) {
+        if (self.mapped_regions[self.region_counter] == null) {
             zvm.logging.debug("Found empty region", null);
             self.mapped_regions[self.region_counter] = Region {
                .device = device,
