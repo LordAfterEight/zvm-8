@@ -27,7 +27,7 @@ pub fn Register(comptime capacity: u8) type {
                     const bits: usize = capacity * 8;
                     const max: comptime_int = if (bits == 0) 0 else ((@as(comptime_int, 1) << @intCast(bits)) - 1);
                     if (std.math.maxInt(@TypeOf(val)) > max) {
-                        zvm.logging.debug("Value to load exceeds size, truncating", self);
+                        zvm.logging.debug("Value to load exceeds size, ignoring", self);
                         return;
                     }
 

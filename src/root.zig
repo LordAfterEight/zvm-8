@@ -14,3 +14,4 @@ pub const core = struct {
 };
 
 pub const logging =  @import("log/log.zig");
+pub const timer =  @import("log/timer.zig");

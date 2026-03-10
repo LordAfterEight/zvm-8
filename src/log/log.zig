@@ -2,7 +2,13 @@ const zvm = @import("../root.zig");
 const std = @import("std");
 
 pub fn debug(msg: []const u8, obj: anytype) void {
-    std.debug.print("\x1b[38;2;100;100;100mmsg:\x1b[0m {s}\n", .{msg});
+    const elapsed = zvm.timer.read();
+    const ms_total = elapsed / std.time.ns_per_ms;
+    const minutes = ms_total / 60000;
+    const seconds = (ms_total % 60000) / 1000;
+    const millis  = ms_total % 1000;
+    const micros  = (elapsed % std.time.ns_per_ms) / std.time.ns_per_us;
+    std.debug.print("\x1b[38;2;100;100;100m[{d:0>2}m:{d:0>2}s:{d:0>3}ms:{d:0>3}µs] msg:\x1b[0m {s}\n", .{minutes, seconds, millis, micros, msg});
     switch (@TypeOf(obj)) {
         zvm.core.cpu.CPU => {
             std.debug.print("\x1b[38;2;0;255;0m * Registers:\x1b[0m\n", .{});
@@ -32,22 +38,22 @@ pub fn debug(msg: []const u8, obj: anytype) void {
             }
         },
         *zvm.core.reg.Reg8, zvm.core.reg.Reg8 => {
-            std.debug.print(" \x1b[38;2;0;255;255m* Name: {s}\x1b[0m\n", .{obj.name});
-            std.debug.print(" \x1b[38;2;0;255;255m* ID: {d}\x1b[0m\n", .{obj.id});
-            std.debug.print(" \x1b[38;2;0;255;255m* Value: {d}\x1b[0m\n", .{@as(u8, @bitCast(obj.value))});
+            std.debug.print(" \x1b[38;2;0;255;255m * Name: {s}\x1b[0m\n", .{obj.name});
+            std.debug.print(" \x1b[38;2;0;255;255m * ID: {d}\x1b[0m\n", .{obj.id});
+            std.debug.print(" \x1b[38;2;0;255;255m * Value: {d}\x1b[0m\n", .{@as(u8, @bitCast(obj.value))});
         },
         *zvm.core.reg.Reg32, zvm.core.reg.Reg32 => {
-            std.debug.print(" \x1b[38;2;0;255;255m* Name: {s}\x1b[0m\n", .{obj.name});
-            std.debug.print(" \x1b[38;2;0;255;255m* ID: {d}\x1b[0m\n", .{obj.id});
-            std.debug.print(" \x1b[38;2;0;255;255m* Value: {d}\x1b[0m\n", .{@as(u32, @bitCast(obj.value))});
+            std.debug.print(" \x1b[38;2;0;255;255m * Name: {s}\x1b[0m\n", .{obj.name});
+            std.debug.print(" \x1b[38;2;0;255;255m * ID: {d}\x1b[0m\n", .{obj.id});
+            std.debug.print(" \x1b[38;2;0;255;255m * Value: {d}\x1b[0m\n", .{@as(u32, @bitCast(obj.value))});
         },
         zvm.device.device.Device, *zvm.device.device.Device => {
-            std.debug.print(" \x1b[38;2;0;255;255m* Name: {s}\x1b[0m\n", .{obj.name});
+            std.debug.print(" \x1b[38;2;0;255;255m * Name: {s}\x1b[0m\n", .{obj.name});
         },
         zvm.mem.bus.Region, *zvm.mem.bus.Region => {
-            std.debug.print(" \x1b[38;2;0;255;255m* Name: {s}\x1b[0m\n", .{obj.device.name});
-            std.debug.print(" \x1b[38;2;0;255;255m* Base: {d} (0x{X:07})\x1b[0m\n", .{obj.base, obj.base});
-            std.debug.print(" \x1b[38;2;0;255;255m* Size: {d} (0x{X:07} - 0x{X:07})\x1b[0m\n", .{obj.size, obj.base, obj.base + obj.size});
+            std.debug.print(" \x1b[38;2;0;255;255m * Name: {s}\x1b[0m\n", .{obj.device.name});
+            std.debug.print(" \x1b[38;2;0;255;255m * Base: {d} (0x{X:07})\x1b[0m\n", .{obj.base, obj.base});
+            std.debug.print(" \x1b[38;2;0;255;255m * Size: {d} (0x{X:07} - 0x{X:07})\x1b[0m\n", .{obj.size, obj.base, obj.base + obj.size});
         },
         u8, u16, u32, u64, comptime_int => std.debug.print(" * {d}\n", .{obj}),
         else => {},

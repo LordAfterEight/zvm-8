@@ -2,6 +2,7 @@ const std = @import("std");
 const zvm = @import("zvm");
 
 pub fn main() anyerror!void {
+    try zvm.timer.start();
     var cpu = zvm.core.cpu.CPU.init();
     var bus = zvm.mem.bus.Bus.init();
 
