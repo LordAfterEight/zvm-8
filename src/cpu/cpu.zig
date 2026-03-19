@@ -45,7 +45,8 @@ pub const CPU = struct {
     }
 
     /// Executes one full cycle
-    pub fn tick() anyerror!void {
+    pub fn tick(self: *CPU) anyerror!void {
+        _ = self;
         return;
     }
 };

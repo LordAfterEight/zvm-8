@@ -36,7 +36,7 @@ pub const Bus = struct {
     /// Loads a byte from the given address. Forwards call to device if
     /// address falls into memory-mapped device region, uses RAM otherwise.
     pub fn load_u8(self: *Bus, address: usize) u8 {
-        zvm.logging.debug("Looking for device...", .{});
+        zvm.logging.debug("Looking for device to load from...", .{});
         for(0..self.mapped_regions.len) |idx| {
             if (self.mapped_regions[idx]) |region| {
                 if (address >= region.base and address < region.base + region.size) {
@@ -53,7 +53,7 @@ pub const Bus = struct {
     /// Stores a byte from the given address. Forwards call to device if
     /// address falls into memory-mapped device region, uses RAM otherwise.
     pub fn store_u8(self: *Bus, address: usize, value: u8) void {
-        zvm.logging.debug("Looking for device...", .{});
+        zvm.logging.debug("Looking for device to store to...", .{});
         for(0..self.mapped_regions.len) |idx| {
             if (self.mapped_regions[idx]) |region|{
                 if (address >= region.base and address < region.base + region.size) {
@@ -63,6 +63,8 @@ pub const Bus = struct {
                 }
             }
         }
+        zvm.logging.debug("Falling back to RAM", .{});
+        self.ram[address] = value;
     }
 };
 
