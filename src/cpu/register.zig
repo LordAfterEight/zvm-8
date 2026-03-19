@@ -4,7 +4,6 @@ const std = @import("std");
 pub const Reg32 = Register(4);
 pub const Reg8 = Register(1);
 
-/// A variable-size Register. Capacity means the possible internal value size in bytes
 pub fn Register(comptime capacity: u8) type {
     return struct {
         name: []const u8,
@@ -27,13 +26,13 @@ pub fn Register(comptime capacity: u8) type {
                     const bits: usize = capacity * 8;
                     const max: comptime_int = if (bits == 0) 0 else ((@as(comptime_int, 1) << @intCast(bits)) - 1);
                     if (std.math.maxInt(@TypeOf(val)) > max) {
-                        zvm.logging.debug("Value to load exceeds size, ignoring", self);
+                        zvm.logging.debug("Maximum possible value based on type exceeds size, ignoring", self);
                         return;
                     }
 
                     const uval = @as(u32, val);
                     for (0..self.value.len) |idx| {
-                        self.value[idx] = @intCast(uval >> @intCast(8 * idx));
+                        self.value[idx] = @truncate(uval >> @intCast(8 * idx));
                     }
 
                     zvm.logging.debug("Loaded value:", val);
@@ -51,6 +50,18 @@ pub fn Register(comptime capacity: u8) type {
         pub fn load_slice(self: *@This(), val: []u8) anyerror!void {
             if (val.len > self.value.len) return error.ExceededCapacity;
             @memcpy(self.value, val);
+        }
+
+        /// Returns the inside value as usize, though it will never be larger than
+        /// the register bit width allows.
+        pub fn get_value(self: *@This()) usize {
+            var val: usize = 0;
+            var idx = self.value.len;
+            while (idx > 0) {
+                idx -= 1;
+                val = val << 8 | self.value[idx];
+            }
+            return val;
         }
     };
 }

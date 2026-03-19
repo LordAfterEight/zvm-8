@@ -13,9 +13,6 @@ pub const CPU = struct {
     /// The System Bus
     bus: *zvm.mem.bus.Bus,
 
-    /// Control Unit.
-    cu: zvm.core.cu.CU,
-
     /// Initializes the CPU
     pub fn init() CPU {
         var cpu = CPU {
@@ -24,12 +21,10 @@ pub const CPU = struct {
             .spr = zvm.core.reg.Reg32.new("Stack Pointer"),
             .alu = zvm.core.alu.ALU.init(),
             .bus = undefined,
-            .cu = undefined
         };
         for (0..cpu.gpr.len) |i| {
             cpu.gpr[i].id = @intCast(i);
         }
-        cpu.cu = zvm.core.cu.CU.init(&cpu);
         return cpu;
     }
 
@@ -37,6 +32,16 @@ pub const CPU = struct {
     pub fn connect_bus(self: *CPU, bus: *zvm.mem.bus.Bus) void {
         zvm.logging.debug("Connecting bus to CPU", .{});
         self.bus = bus;
+    }
+
+    /// Loads a byte from the given address
+    pub fn load(self: *CPU, address: usize) u8 {
+        return self.bus.load_u8(address);
+    }
+
+    /// Stores a byte to the given address
+    pub fn store(self: *CPU, address: usize, value: u8) void {
+        self.bus.store_u8(address, value);
     }
 
     /// Executes one full cycle

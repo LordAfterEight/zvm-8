@@ -53,9 +53,9 @@ pub fn debug(msg: []const u8, obj: anytype) void {
         zvm.mem.bus.Region, *zvm.mem.bus.Region => {
             std.debug.print(" \x1b[38;2;0;255;255m * Name: {s}\x1b[0m\n", .{obj.device.name});
             std.debug.print(" \x1b[38;2;0;255;255m * Base: {d} (0x{X:07})\x1b[0m\n", .{obj.base, obj.base});
-            std.debug.print(" \x1b[38;2;0;255;255m * Size: {d} (0x{X:07} - 0x{X:07})\x1b[0m\n", .{obj.size, obj.base, obj.base + obj.size});
+            std.debug.print(" \x1b[38;2;0;255;255m * Size: {d} (0x{X:07} - 0x{X:07})\x1b[0m\n", .{obj.size, obj.base, obj.base + obj.size - 1});
         },
-        u8, u16, u32, u64, comptime_int => std.debug.print(" * {d}\n", .{obj}),
+        u8, u16, u32, u64, comptime_int => std.debug.print(" \x1b[38;2;0;255;255m * {d}\x1b[0m\n", .{obj}),
         else => {},
     }
 }
