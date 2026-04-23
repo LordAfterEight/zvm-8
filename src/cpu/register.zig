@@ -25,8 +25,8 @@ pub fn Register(comptime capacity: u8) type {
                 comptime_int, u8, u16, u32 => {
                     const bits: usize = capacity * 8;
                     const max: comptime_int = if (bits == 0) 0 else ((@as(comptime_int, 1) << @intCast(bits)) - 1);
-                    if (std.math.maxInt(@TypeOf(val)) > max) {
-                        zvm.logging.debug("Maximum possible value based on type exceeds size, ignoring", self);
+                    if (val > max) {
+                        zvm.logging.debug("Value exceeds register capacity, ignoring", self);
                         return;
                     }
 
@@ -36,7 +36,7 @@ pub fn Register(comptime capacity: u8) type {
                     }
 
                     zvm.logging.debug("Loaded value:", val);
-                    zvm.logging.debug("Reg:", self);
+                    zvm.logging.debug("Into Reg:", self);
                 },
                 else => {
                     zvm.logging.debug("Invalid value type, doing nothing", self);

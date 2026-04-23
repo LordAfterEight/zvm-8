@@ -1,3 +1,4 @@
+const std = @import("std");
 const zvm = @import("../root.zig");
 
 pub const CPU = struct {
@@ -15,26 +16,20 @@ pub const CPU = struct {
     /// The System Bus
     bus: *zvm.mem.bus.Bus,
 
-    /// Initializes the CPU
-    pub fn init() CPU {
-        var cpu = CPU {
+    /// Initializes the CPU with a connected system bus
+    pub fn init(bus: *zvm.mem.bus.Bus) CPU {
+        var cpu = CPU{
             .gpr = [_]zvm.core.reg.Reg8{.new("GPR")} ** 32,
             .ir = zvm.core.reg.Reg8.new("Instruction Register"),
             .ipr = zvm.core.reg.Reg32.new("Instruction Pointer"),
             .spr = zvm.core.reg.Reg32.new("Stack Pointer"),
             .alu = zvm.core.alu.ALU.init(),
-            .bus = undefined,
+            .bus = bus,
         };
         for (0..cpu.gpr.len) |i| {
             cpu.gpr[i].id = @intCast(i);
         }
         return cpu;
-    }
-
-    /// Simply provides the CPU with a pointer to a system bus
-    pub fn connect_bus(self: *CPU, bus: *zvm.mem.bus.Bus) void {
-        zvm.logging.debug("Connecting bus to CPU", .{});
-        self.bus = bus;
     }
 
     /// Advances the IPR, wrapping
@@ -63,20 +58,26 @@ pub const CPU = struct {
         self.gpr[2].load_uint(self.bus.load_u8(self.ipr.get_value()));
         self.step();
         self.gpr[3].load_uint(self.bus.load_u8(self.ipr.get_value()));
-        self.ipr.load_uint(@as(u32, @intCast(self.gpr[0].get_value() << 24 | self.gpr[1].get_value() << 16 | self.gpr[2].get_value() << 8 | self.gpr[3].get_value())));
+        self.ipr.load_uint(@as(u32, @intCast(
+            self.gpr[0].get_value() << 24
+            | self.gpr[1].get_value() << 16
+            | self.gpr[2].get_value() << 8
+            | self.gpr[3].get_value()
+        )));
     }
 
     /// Executes one full cycle
     pub fn tick(self: *CPU) anyerror!void {
-        self.reset();
         self.ir.load_uint(self.bus.load_u8(self.ipr.get_value()));
+        self.step();
         return;
     }
 
     /// Starts the CPU
-    pub fn run(self: *CPU) void {
-        while (1) {
-            _ = self.tick();
+    pub fn run(self: *CPU) anyerror!void {
+        self.reset();
+        while (true) {
+            try self.tick();
         }
     }
 };
