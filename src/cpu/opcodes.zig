@@ -1,0 +1,26 @@
+pub const OpCode = enum(u8) {
+    LDI = 0xA0,
+    STI = 0xA1,
+
+    JMP = 0xB0,
+    JMR = 0xB1,
+    BRA = 0xB2,
+    BRR = 0xB3,
+    RTR = 0xB4,
+
+    ADD = 0xC0,
+    SUB = 0xC1,
+    POW = 0xC2,
+    AND = 0xC3,
+    ORI = 0xC4,
+    ORR = 0xC5,
+    XOR = 0xC6,
+
+    PSH = 0xD0,
+    POP = 0xD1,
+
+    SRE = 0xF0,
+    HRE = 0xF1,
+    HLT = 0xF2,
+    NOP = 0xF3,
+};

@@ -20,6 +20,20 @@ pub const Bus = struct {
         };
     }
 
+    pub fn load_rvm(self: *Bus) !void {
+        const file = std.fs.cwd().openFile("ROM.rvm", .{ .mode = .read_only }) catch |err| return err;
+        defer file.close();
+        const stat = file.stat() catch |err| return err;
+        std.debug.print("Opened ROM file of size: {d}B\n", .{stat.size});
+
+        var reader = file.reader(self.ram[0..stat.size]);
+        reader.interface.readSliceAll(self.ram[0..stat.size]) catch |err| return err;
+
+        if (self.ram[0] != 'R' or self.ram[1] != 'V' or self.ram[2] != 'M') {
+            return error.InvalidFileHeader;
+        }
+    }
+
     /// Frees the owned RAM
     pub fn deinit(self: *Bus) void {
         self.allocator.destroy(self.ram);

@@ -1,5 +1,6 @@
 const std = @import("std");
 const zvm = @import("../root.zig");
+const OpCode = @import("opcodes.zig").OpCode;
 
 pub const CPU = struct {
     /// General Purpose Register, 8-bit
@@ -68,14 +69,35 @@ pub const CPU = struct {
 
     /// Executes one full cycle
     pub fn tick(self: *CPU) anyerror!void {
-        self.ir.load_uint(self.bus.load_u8(self.ipr.get_value()));
-        self.step();
+        const ipr_val = self.ipr.get_value();
+        std.debug.print("IPR: 0x{X:0>2}\n", .{ipr_val});
+        const bus_val = self.bus.load_u8(ipr_val);
+        std.debug.print("BUS: 0x{X:0>2}\n", .{bus_val});
+        self.ir.load_uint(bus_val);
+        const ir_val = self.ir.get_value();
+        std.debug.print("IR: 0x{X:0>2}\n", .{ir_val});
+
+        const val: OpCode = @enumFromInt(self.ir.get_value());
+        std.debug.print("Value: 0x{X:0>2}\n", .{val});
+
+        switch (val) {
+            OpCode.JMP => {
+                self.step();
+                self.ir.load_uint(self.ipr.get_value());
+                const addr1 = self.ir.get_value();
+                self.step();
+                self.ir.load_uint(self.ipr.get_value());
+                const addr2 = self.ir.get_value();
+
+                self.ipr.load_uint(@as(u16, @intCast(addr1 << @as(usize, 8) | addr2)));
+            },
+            else => return error.InvalidOpCode
+        }
         return;
     }
 
     /// Starts the CPU
     pub fn run(self: *CPU) anyerror!void {
-        self.reset();
         while (true) {
             try self.tick();
         }
