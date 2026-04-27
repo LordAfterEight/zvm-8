@@ -4,6 +4,7 @@ pub const mem = struct {
 
 pub const device = struct {
     pub const device = @import("device/device.zig");
+    pub const serial = @import("device/serial.zig");
 };
 
 pub const core = struct {
